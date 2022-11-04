@@ -28,7 +28,7 @@ nano
 RUN pip install virtualenv
 RUN mkdir .virtualenv
 RUN cd .virtualenv
-RUN virtuanenv venv
+RUN virtualenv venv
 RUN source venv/bin/activate
 # Copy our script into the container
 COPY script.py /app/script.py

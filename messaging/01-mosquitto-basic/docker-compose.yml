@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    build: .
+    container_name: mosquitto-broker
+    ports:
+      - "1883:1883"    # MQTT port
+      - "9001:9001"    # WebSocket port
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    restart: unless-stopped
+    networks:
+      - mqtt_network
+
+  # MQTT Client for testing
+  mqtt-client:
+    image: eclipse-mosquitto:2.0
+    depends_on:
+      - mosquitto
+    command: mosquitto_sub -h mosquitto -t "test/topic"
+    networks:
+      - mqtt_network
+    profiles:
+      - testing
+
+volumes:
+  mosquitto_data:
+  mosquitto_logs:
+
+networks:
+  mqtt_network:
+    driver: bridge

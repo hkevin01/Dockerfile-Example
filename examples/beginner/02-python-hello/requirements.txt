@@ -1,0 +1,15 @@
+# Requirements for Python Hello World Docker Example
+# This file demonstrates dependency management in Python containers
+
+# Core utilities (already included in Python, but showing for educational purposes)
+# Standard library modules don't need to be listed here, but we include some
+# optional packages that enhance the learning experience
+
+# Date and time utilities (enhanced)
+python-dateutil==2.8.2
+
+# Colored terminal output for better visual experience
+colorama==0.4.6
+
+# For potential future enhancements
+requests==2.31.0

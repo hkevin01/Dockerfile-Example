@@ -1,0 +1,104 @@
+name: Docker Examples CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-examples:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Set up Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+        
+    - name: Make build script executable
+      run: chmod +x scripts/build-and-test.sh
+      
+    - name: Test Hello World Example
+      run: |
+        cd examples/beginner/01-hello-world
+        docker build -t hello-world-test .
+        docker run --rm hello-world-test
+        
+    - name: Test Mosquitto Basic Example
+      run: |
+        cd messaging/01-mosquitto-basic
+        docker-compose config
+        docker-compose up -d
+        sleep 10
+        docker-compose ps
+        docker-compose down
+        
+    - name: Run automated tests
+      run: ./scripts/build-and-test.sh
+      
+    - name: Clean up Docker resources
+      run: |
+        docker system prune -af
+        docker volume prune -f
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check README files
+      run: |
+        # Check that all example directories have README files
+        find examples/ messaging/ databases/ web-services/ monitoring/ -type d -mindepth 2 -maxdepth 2 | while read dir; do
+          if [ ! -f "$dir/README.md" ]; then
+            echo "Missing README.md in $dir"
+            exit 1
+          fi
+        done
+        
+    - name: Check Dockerfile syntax
+      run: |
+        # Find and validate all Dockerfiles
+        find . -name "Dockerfile*" -type f | while read dockerfile; do
+          echo "Checking $dockerfile"
+          docker run --rm -i hadolint/hadolint < "$dockerfile" || true
+        done
+        
+    - name: Validate Docker Compose files
+      run: |
+        find . -name "docker-compose*.yml" -type f | while read compose_file; do
+          echo "Validating $compose_file"
+          cd "$(dirname "$compose_file")"
+          docker-compose config
+          cd - > /dev/null
+        done
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'

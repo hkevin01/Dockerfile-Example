@@ -482,6 +482,188 @@ graph TD
 - ✅ Introduction to multi-stage builds
 - ⏱️ **Time**: 2-3 hours
 
+#### Example 1: Hello World (`01-hello-world/`)
+
+**What it teaches:**
+- Most basic Dockerfile possible
+- FROM, COPY, CMD instructions
+- How Docker layers work
+
+**Why this example:**
+```dockerfile
+FROM alpine:latest
+COPY hello.sh /
+CMD ["/hello.sh"]
+```
+
+- ✅ **Alpine**: 5MB base, perfect for learning
+- ✅ **Single script**: Focus on Docker, not app complexity
+- ✅ **No dependencies**: Eliminates variables, pure Docker learning
+
+**How it works:**
+1. Starts with Alpine Linux (minimal OS)
+2. Copies your script into the container
+3. Sets script as the command to run
+4. Container executes script and exits
+
+**Real-world application**:
+- Batch processing jobs
+- Cron tasks
+- Simple utilities
+- CI/CD pipeline scripts
+
+---
+
+#### Example 2: Python Hello (`02-python-hello/`)
+
+**What it teaches:**
+- Python runtime environment
+- Requirements management
+- Non-root user security
+- Working directory setup
+
+**Why this approach:**
+```dockerfile
+FROM python:3.11-slim
+RUN useradd -r -s /bin/false appuser  # Security!
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+USER appuser  # Don't run as root
+CMD ["python", "hello.py"]
+```
+
+**Key concepts explained:**
+- **Why slim?** Balances size (124MB) with compatibility
+- **Why non-root?** If app is compromised, attacker has limited access
+- **Why --no-cache-dir?** Saves ~50MB by not storing pip cache
+- **Why WORKDIR?** Organized file structure, predictable paths
+
+**How it works:**
+1. Python 3.11 slim image (has python + pip, no build tools)
+2. Creates dedicated user for security (UID 1001)
+3. Sets working directory to /app
+4. Installs only what's in requirements.txt
+5. Copies application code
+6. Switches to non-root user
+7. Runs Python script
+
+**Real-world application**:
+- REST API services
+- Data processing scripts
+- Machine learning inference
+- Automation tools
+
+---
+
+#### Example 3: Node.js Hello (`03-node-hello/`)
+
+**What it teaches:**
+- Node.js containerization
+- Package management (npm)
+- Health check endpoints
+- Express.js basics
+
+**Why Express.js:**
+```javascript
+const express = require('express');
+const app = express();
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+```
+
+- ✅ **Industry standard**: Used by 65% of Node.js projects
+- ✅ **Minimal overhead**: Just routing, you add what you need
+- ✅ **Health checks**: Critical for orchestration (K8s, Docker Swarm)
+
+**Dockerfile strategy:**
+```dockerfile
+FROM node:20-alpine
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm ci --only=production  # Reproducible installs
+COPY . .
+USER node  # Built-in non-root user
+EXPOSE 3000
+CMD ["node", "app.js"]
+```
+
+**Why this works:**
+- **npm ci**: Faster, reproducible installs (uses package-lock.json)
+- **--only=production**: Excludes devDependencies (testing, linting)
+- **USER node**: Alpine node image has pre-created user
+- **EXPOSE**: Documents the port (doesn't actually publish it)
+
+**How health checks enable:**
+1. Load balancers know when to route traffic
+2. Kubernetes knows when to restart unhealthy pods
+3. Docker Compose can wait for service readiness
+4. Monitoring systems can track service health
+
+**Real-world application**:
+- Web applications
+- REST APIs
+- Microservices
+- Real-time services (WebSocket)
+
+---
+
+#### Example 4: Python Flask Multi-Stage (`04-python-flask-multistage/`)
+
+**What it teaches:**
+- First multi-stage build
+- Production WSGI server (Gunicorn)
+- Build vs runtime separation
+- Size optimization
+
+**Why multi-stage here:**
+```dockerfile
+# Stage 1: Builder (can have build tools)
+FROM python:3.11 AS builder
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Stage 2: Runtime (minimal)
+FROM python:3.11-slim
+COPY --from=builder /root/.local /root/.local
+COPY . .
+CMD ["gunicorn", "app:app"]
+```
+
+**The magic of --from=builder:**
+- Only copies installed packages, not pip/setuptools
+- Build stage is discarded (not in final image)
+- Final image: 151MB vs single-stage: 380MB (60% savings!)
+
+**Why Gunicorn over Flask dev server:**
+
+| Feature | Flask Dev Server | Gunicorn |
+|---------|------------------|----------|
+| **Concurrency** | Single-threaded | Multi-worker |
+| **Performance** | ~100 req/sec | ~10,000 req/sec |
+| **Production** | ❌ Not safe | ✅ Battle-tested |
+| **Crash isolation** | ❌ Crashes all | ✅ Worker isolation |
+
+**How Gunicorn works:**
+```bash
+gunicorn app:app --workers 4 --threads 2
+```
+- Pre-forks 4 worker processes
+- Each worker handles 2 threads
+- Total: 8 concurrent requests
+- If one worker crashes, others continue
+
+**Real-world application**:
+- Production web apps
+- REST APIs at scale
+- Microservices
+- Backend for mobile/frontend apps
+
+---
+
 ### 🌿 Intermediate Level
 **Focus**: Production-ready optimization techniques
 
@@ -491,6 +673,201 @@ graph TD
 - ✅ Health checks and monitoring
 - ✅ Build optimization strategies
 - ⏱️ **Time**: 5-7 hours
+
+#### Example 5: Node.js Express Multi-Stage (`intermediate/01-nodejs-express-multistage/`)
+
+**What it teaches:**
+- Production Node.js patterns
+- Development vs production dependencies
+- Docker Compose networking
+- Health checks in practice
+- Environment-based configuration
+
+**Why separate dev and prod dependencies:**
+```json
+{
+  "devDependencies": {
+    "nodemon": "^3.0.0",     // 5MB - Auto-restart in dev
+    "jest": "^29.0.0",       // 10MB - Testing
+    "eslint": "^8.0.0",      // 8MB - Linting
+    "@types/node": "^20.0.0" // 15MB - TypeScript types
+  },
+  "dependencies": {
+    "express": "^4.18.0",    // 2MB - Actually needed
+    "helmet": "^7.0.0"       // 100KB - Security
+  }
+}
+```
+
+**Impact**: devDependencies = 38MB, dependencies = 2.1MB
+**Savings**: 95% size reduction by excluding dev tools!
+
+**Multi-stage strategy:**
+```dockerfile
+# Stage 1: Build (install everything for building)
+FROM node:20-alpine AS builder
+COPY package*.json ./
+RUN npm ci --include=dev
+RUN npm run build  # Might need dev tools for this
+
+# Stage 2: Production (only runtime deps)
+FROM node:20-alpine
+COPY package*.json ./
+RUN npm ci --only=production  # 95% less stuff
+COPY --from=builder /app/dist ./dist
+USER node
+CMD ["node", "dist/server.js"]
+```
+
+**Docker Compose benefits:**
+```yaml
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+**Why each setting:**
+- **healthcheck**: Orchestrator knows when service is ready
+- **networks**: Isolated communication, service discovery
+- **restart: unless-stopped**: Auto-restart on crash/reboot
+- **environment**: Runtime configuration without rebuilding
+
+**How networking enables:**
+```yaml
+services:
+  app:
+    networks:
+      - frontend
+
+  database:
+    networks:
+      - backend
+
+  api:
+    networks:
+      - frontend
+      - backend  # Bridge between them
+```
+
+- **Isolation**: Frontend can't directly access database
+- **Security**: Only API service can talk to database
+- **Service discovery**: Use service name as hostname
+- **Scalability**: Add/remove services without IP management
+
+**Real-world application**:
+- Production APIs
+- Multi-tier applications
+- Microservices communication
+- Development environment parity
+
+---
+
+#### Example 6: Mosquitto MQTT (`messaging/01-mosquitto-basic/`)
+
+**What it teaches:**
+- Message broker setup
+- Docker volumes (data persistence)
+- Configuration management
+- Port mapping (TCP + WebSocket)
+- Service dependencies
+
+**Why MQTT:**
+```
+HTTP Request/Response:
+Client → [Request] → Server
+Client ← [Response] ← Server
+(Connection closed, one-time)
+
+MQTT Pub/Sub:
+Publisher → [Message] → Broker → [Message] → Subscribers
+(Persistent connection, real-time, many-to-many)
+```
+
+**Use cases:**
+- ✅ IoT devices (sensors sending data)
+- ✅ Real-time dashboards (live updates)
+- ✅ Mobile apps (push notifications)
+- ✅ Chat systems (instant messaging)
+
+**Why Mosquitto over others:**
+| Feature | Mosquitto | RabbitMQ | Redis Pub/Sub |
+|---------|-----------|----------|---------------|
+| **Size** | 10MB | 200MB | 50MB |
+| **Protocol** | MQTT | AMQP | Redis |
+| **IoT focus** | ✅ Yes | ❌ No | ❌ No |
+| **QoS levels** | 0,1,2 | Yes | No |
+
+**Docker Compose setup:**
+```yaml
+services:
+  mosquitto:
+    build: .
+    ports:
+      - "1883:1883"  # MQTT
+      - "9001:9001"  # WebSocket
+    volumes:
+      - mqtt-data:/mosquitto/data      # Persist messages
+      - mqtt-logs:/mosquitto/log       # Persist logs
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+
+volumes:
+  mqtt-data:     # Docker-managed volume
+  mqtt-logs:     # Survives container deletion
+```
+
+**Why volumes matter:**
+```bash
+# Without volumes:
+docker stop mosquitto  # Data lost!
+
+# With volumes:
+docker stop mosquitto  # Data safe
+docker rm mosquitto    # Data still safe
+docker-compose up      # Data restored!
+```
+
+**Configuration explained:**
+```conf
+# mosquitto.conf
+persistence true              # Save messages to disk
+persistence_location /mosquitto/data/
+
+listener 1883                 # MQTT port
+listener 9001                 # WebSocket port
+protocol websockets           # Enable WS
+
+allow_anonymous false         # Security: require auth
+password_file /mosquitto/config/passwd
+```
+
+**How message flow works:**
+1. **Publisher** connects to broker (Mosquitto)
+2. **Publishes** message to topic: `sensors/temperature`
+3. **Broker** stores message (if QoS 1 or 2)
+4. **Subscribers** connected to `sensors/#` receive message
+5. **QoS ensures delivery** even if subscriber was offline
+
+**Real-world application**:
+- IoT data collection (thousands of sensors)
+- Real-time monitoring dashboards
+- Mobile app notifications
+- Industrial automation
+- Smart home systems
 
 ### 🌳 Advanced Level
 **Focus**: Complex architectures and enterprise patterns
@@ -502,6 +879,134 @@ graph TD
 - ✅ CI/CD pipeline integration (GitHub Actions workflows)
 - ⏱️ **Time**: 10-15 hours
 
+#### Example 7: Go Multi-Stage with Scratch (`advanced/01-go-multistage/`)
+
+**What it teaches:**
+- Ultimate size optimization (99.4% reduction!)
+- Static binary compilation
+- Scratch base image (0 bytes)
+- Cross-platform builds
+- Production-grade Go services
+
+**Why Go is perfect for extreme optimization:**
+```go
+// This simple Go code compiles to a fully self-contained binary
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}
+```
+
+**Compiled characteristics:**
+```bash
+$ go build -o myapp
+$ ls -lh myapp
+-rwxr-xr-x  1 user  staff   2.0M Nov  4 10:00 myapp
+
+$ ldd myapp
+    not a dynamic executable  # No external dependencies!
+
+$ file myapp
+myapp: ELF 64-bit LSB executable, statically linked
+```
+
+**Why static linking matters:**
+- Binary includes Go runtime (garbage collector, scheduler)
+- No libc dependency (unlike C programs)
+- Works on ANY Linux system
+- Can run from scratch (empty filesystem)
+
+**Multi-stage ultimate optimization:**
+```dockerfile
+# Stage 1: Build (800MB - full Go toolchain)
+FROM golang:1.21-alpine AS builder
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download        # Cache dependencies separately
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -a -installsuffix cgo \
+    -ldflags='-w -s -extldflags "-static"' \
+    -o server .
+
+# Stage 2: Runtime (0MB base + 4.58MB binary = 4.58MB total!)
+FROM scratch
+COPY --from=builder /build/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+```
+
+**Build flags explained:**
+- `CGO_ENABLED=0`: Pure Go, no C dependencies (crucial for scratch)
+- `GOOS=linux`: Target Linux (even if building on Mac/Windows)
+- `GOARCH=amd64`: Target architecture (can be arm64, etc.)
+- `-a`: Force rebuild of all packages (ensures static linking)
+- `-ldflags='-w -s'`: Strip debug info and symbol table (~30% size reduction)
+- `-extldflags "-static"`: Force static linking
+
+**Size comparison:**
+```
+golang:1.21              800MB   (Full Go toolchain + OS)
+golang:1.21-alpine       315MB   (Go + Alpine Linux)
+alpine:latest             5MB    (Just Alpine, no Go)
+scratch + Go binary     4.58MB   (Ultimate minimal!)
+```
+
+**What is scratch?**
+```dockerfile
+FROM scratch
+# This is literally an empty filesystem.
+# No shell, no ls, no cat, no /etc, no /tmp
+# NOTHING. It's the absence of everything.
+```
+
+**Pros of scratch:**
+- ✅ **Smallest possible**: Only your binary
+- ✅ **Ultimate security**: No OS, no vulnerabilities, no attack surface
+- ✅ **Fast startup**: Nothing to initialize
+- ✅ **Perfect for**: Statically compiled binaries (Go, Rust)
+
+**Cons of scratch:**
+- ❌ **No shell**: Can't `docker exec -it container sh`
+- ❌ **No debugging tools**: No ls, cat, ps, netstat
+- ❌ **No CA certificates**: Need to copy if making HTTPS calls
+- ❌ **No timezone data**: Need to copy if using time.Local
+
+**When you need CA certificates:**
+```dockerfile
+FROM alpine:latest AS certs
+RUN apk --update add ca-certificates
+
+FROM scratch
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /build/server /server
+ENTRYPOINT ["/server"]
+```
+
+**Real-world application**:
+- Microservices (thousands of instances = huge cost savings)
+- API gateways
+- CLI tools distributed as containers
+- Serverless functions (AWS Lambda, Cloud Run)
+- Edge computing (minimal bandwidth)
+
+**Production benefits:**
+```
+1000 container instances:
+- Regular images: 800GB total
+- Scratch images: 4.58GB total
+- Bandwidth saved: 795GB
+- Pull time: 30 seconds → 1 second
+- Cost savings: Significant at scale
+```
+
+---
+
 ### 🌲 Expert Level
 **Focus**: Production deployment and scaling
 
@@ -511,6 +1016,256 @@ graph TD
 - ✅ Enterprise security patterns (Non-root users, minimal images, scratch bases)
 - ⭕ Multi-cloud deployments (Planned)
 - ⏱️ **Time**: 20+ hours
+
+#### High Availability Patterns (Implemented)
+
+**What high availability means:**
+- Service continues running despite failures
+- Automatic recovery from crashes
+- Zero-downtime deployments
+- Health monitoring and auto-healing
+
+**Pattern 1: Health Checks + Restart Policies**
+```yaml
+# docker-compose.yml
+services:
+  api:
+    image: myapi:latest
+    restart: unless-stopped        # Restart on crash
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s                # Check every 30s
+      timeout: 10s                 # Fail if takes >10s
+      retries: 3                   # Allow 3 failures
+      start_period: 40s            # Grace period for startup
+```
+
+**How it works:**
+1. Container starts, health checks begin after 40s
+2. Every 30s, Docker runs health check command
+3. If check fails, retry up to 3 times
+4. After 3 failures, mark container as unhealthy
+5. With `restart: unless-stopped`, Docker restarts it
+6. Orchestrators (K8s) can route traffic only to healthy instances
+
+**Pattern 2: Service Redundancy**
+```yaml
+services:
+  api:
+    image: myapi:latest
+    deploy:
+      replicas: 3               # Run 3 copies
+      update_config:
+        parallelism: 1          # Update one at a time
+        delay: 10s              # Wait 10s between updates
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+```
+
+**Benefits:**
+- Load distributed across 3 instances
+- If one crashes, two still serve traffic
+- Rolling updates = zero downtime
+- Parallel deployment prevents all instances failing
+
+**Pattern 3: Network-Level HA**
+```yaml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy  # Wait for API to be healthy
+
+  api:
+    replicas: 3
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8080/health"]
+```
+
+**How nginx load balances:**
+```nginx
+upstream api_backend {
+    server api_1:8080;
+    server api_2:8080;
+    server api_3:8080;
+}
+
+server {
+    location /api {
+        proxy_pass http://api_backend;
+    }
+}
+```
+
+---
+
+#### Enterprise Security Patterns (Implemented)
+
+**Pattern 1: Minimal Base Images**
+```
+Attack Surface Comparison:
+
+ubuntu:latest (77MB, 100+ packages)
+├─ More packages = more CVEs
+├─ Many services/tools available to attacker
+└─ Larger attack surface
+
+alpine:latest (5MB, 14 packages)
+├─ Minimal packages = fewer CVEs
+├─ Limited tools for attacker
+└─ Small attack surface
+
+scratch (0MB, 0 packages)
+├─ No packages = no CVEs
+├─ No tools available whatsoever
+└─ Minimal attack surface
+```
+
+**Pattern 2: Non-Root Everywhere**
+```dockerfile
+FROM python:3.11-slim
+
+# Create dedicated user (not root)
+RUN groupadd -r appgroup && \
+    useradd -r -g appgroup -u 1001 -m -s /bin/false appuser
+
+# Install as root (needed for system packages)
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Change ownership
+COPY --chown=appuser:appgroup . /app
+
+# Drop privileges
+USER appuser
+
+# Now app runs as appuser (UID 1001), not root (UID 0)
+CMD ["python", "app.py"]
+```
+
+**Why this matters:**
+```
+Scenario: Attacker exploits app vulnerability
+
+Running as root:
+1. Exploit gives shell as root
+2. Can install backdoors
+3. Can modify system files
+4. Can access other containers
+5. Can escalate to host (in some configs)
+
+Running as appuser:
+1. Exploit gives shell as appuser
+2. Can't install packages (no sudo)
+3. Can't modify system files
+4. Can't access other users' files
+5. Limited damage potential
+```
+
+**Pattern 3: Read-Only Filesystems**
+```yaml
+services:
+  api:
+    image: myapi:latest
+    read_only: true              # Filesystem is read-only
+    tmpfs:
+      - /tmp                     # Except /tmp (writable)
+    security_opt:
+      - no-new-privileges:true   # Can't escalate privileges
+    cap_drop:
+      - ALL                      # Drop all Linux capabilities
+    cap_add:
+      - NET_BIND_SERVICE         # Only add what's needed
+```
+
+**What this prevents:**
+- ❌ Attacker can't write malicious files
+- ❌ Can't modify binaries
+- ❌ Can't install persistence mechanisms
+- ❌ Can't escalate privileges
+- ✅ App still functions (uses /tmp for temp files)
+
+**Pattern 4: Secret Scanning Prevention**
+```dockerfile
+# ❌ NEVER EVER do this
+ENV API_KEY=secret123
+RUN echo "password=admin" > config.txt
+
+# ✅ Secrets injected at runtime
+ENV API_KEY=""
+# Later: docker run -e API_KEY=secret123 myapp
+```
+
+**Why docker history is dangerous:**
+```bash
+$ docker history myapp:latest
+IMAGE          CREATED         CREATED BY                      SIZE
+abc123         2 minutes ago   ENV API_KEY=secret123           0B
+
+# Anyone with image access sees your secrets!
+```
+
+**Correct approach:**
+```bash
+# Runtime secrets
+docker run -e API_KEY="$(cat secret.txt)" myapp
+
+# Or with secrets manager
+docker secret create api_key api_key.txt
+docker service create --secret api_key myapp
+```
+
+---
+
+#### CI/CD Integration (Implemented via GitHub Actions)
+
+**What our CI/CD does:**
+```yaml
+# .github/workflows/ci-cd.yml
+name: Docker Examples CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Test all multi-stage builds
+        run: bash tests/test-multistage-builds.sh
+
+      - name: Build and test examples
+        run: |
+          cd examples/beginner/04-python-flask-multistage
+          docker build -t test-flask .
+          docker run --rm test-flask
+```
+
+**Why this is important:**
+1. **Automated testing**: Every commit is tested
+2. **Catch breaks early**: Before merging to main
+3. **Documentation accuracy**: Examples must build successfully
+4. **Security scanning**: Can add Trivy/Snyk scans
+5. **Image publishing**: Can push to registry on tag
+
+**Real-world application**:
+- Automated testing of all examples
+- Prevent broken code from merging
+- Ensure examples work across platforms
+- Automated image building and publishing
+- Security vulnerability scanning
 
 ## 🔧 Technology Stack & Why We Chose Them
 

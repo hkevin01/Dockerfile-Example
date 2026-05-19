@@ -38,11 +38,11 @@ docker-compose --profile dev up app-dev
 
 ## 📊 Image Size Comparison
 
-| Stage | Size | Use Case |
+| <sub>Stage</sub> | <sub>Size</sub> | <sub>Use Case</sub> |
 |-------|------|----------|
-| Production | ~120MB | Deployment |
-| Development | ~180MB | Local development |
-| Single-stage | ~300MB+ | Not recommended |
+| <sub>Production</sub> | <sub>~120MB</sub> | <sub>Deployment</sub> |
+| <sub>Development</sub> | <sub>~180MB</sub> | <sub>Local development</sub> |
+| <sub>Single-stage</sub> | <sub>~300MB+</sub> | <sub>Not recommended</sub> |
 
 ## 🔑 Key Features
 

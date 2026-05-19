@@ -223,12 +223,12 @@ COPY --from=builder /app/app /app
 
 ### 📊 Impact Metrics: Real Numbers
 
-| Application | Single-Stage | Multi-Stage | Savings | Method |
+| <sub>Application</sub> | <sub>Single-Stage</sub> | <sub>Multi-Stage</sub> | <sub>Savings</sub> | <sub>Method</sub> |
 |------------|-------------|-------------|---------|---------|
-| Python Flask | 380MB | 151MB | **60%** | Slim base + user installs |
-| Node.js Express | 395MB | 138MB | **65%** | Alpine + prod deps only |
-| Go API | 800MB | 4.58MB | **99.4%** | Scratch base |
-| Average | ~525MB | ~98MB | **81%** | Multi-stage techniques |
+| <sub>Python Flask</sub> | <sub>380MB</sub> | <sub>151MB</sub> | <sub>**60%**</sub> | <sub>Slim base + user installs</sub> |
+| <sub>Node.js Express</sub> | <sub>395MB</sub> | <sub>138MB</sub> | <sub>**65%**</sub> | <sub>Alpine + prod deps only</sub> |
+| <sub>Go API</sub> | <sub>800MB</sub> | <sub>4.58MB</sub> | <sub>**99.4%**</sub> | <sub>Scratch base</sub> |
+| <sub>Average</sub> | <sub>~525MB</sub> | <sub>~98MB</sub> | <sub>**81%**</sub> | <sub>Multi-stage techniques</sub> |
 
 **What this means in production:**
 - **1000 container pulls/day**: Save 427GB bandwidth
@@ -287,13 +287,13 @@ COPY . .                    # Code changes don't break cache
 
 ### 💡 When to Use Multi-Stage Builds
 
-| Scenario | Use Multi-Stage? | Why/Why Not |
+| <sub>Scenario</sub> | <sub>Use Multi-Stage?</sub> | <sub>Why/Why Not</sub> |
 |----------|------------------|-------------|
-| **Production deployments** | ✅ Always | Size, security, performance |
-| **Compiled languages** (Go, Rust, Java) | ✅ Always | Massive size savings (90%+) |
-| **Interpreted languages** (Python, Node.js) | ✅ Recommended | Good savings (50-70%) |
-| **Quick local testing** | ⚠️ Optional | Single-stage is simpler for dev |
-| **Simple scripts** | ⚠️ Optional | May not be worth the complexity |
+| <sub>**Production deployments**</sub> | <sub>✅ Always</sub> | <sub>Size, security, performance</sub> |
+| <sub>**Compiled languages** (Go, Rust, Java)</sub> | <sub>✅ Always</sub> | <sub>Massive size savings (90%+)</sub> |
+| <sub>**Interpreted languages** (Python, Node.js)</sub> | <sub>✅ Recommended</sub> | <sub>Good savings (50-70%)</sub> |
+| <sub>**Quick local testing**</sub> | <sub>⚠️ Optional</sub> | <sub>Single-stage is simpler for dev</sub> |
+| <sub>**Simple scripts**</sub> | <sub>⚠️ Optional</sub> | <sub>May not be worth the complexity</sub> |
 
 ### 🎓 Learning Progression in This Repo
 
@@ -640,12 +640,12 @@ CMD ["gunicorn", "app:app"]
 
 **Why Gunicorn over Flask dev server:**
 
-| Feature | Flask Dev Server | Gunicorn |
+| <sub>Feature</sub> | <sub>Flask Dev Server</sub> | <sub>Gunicorn</sub> |
 |---------|------------------|----------|
-| **Concurrency** | Single-threaded | Multi-worker |
-| **Performance** | ~100 req/sec | ~10,000 req/sec |
-| **Production** | ❌ Not safe | ✅ Battle-tested |
-| **Crash isolation** | ❌ Crashes all | ✅ Worker isolation |
+| <sub>**Concurrency**</sub> | <sub>Single-threaded</sub> | <sub>Multi-worker</sub> |
+| <sub>**Performance**</sub> | <sub>~100 req/sec</sub> | <sub>~10,000 req/sec</sub> |
+| <sub>**Production**</sub> | <sub>❌ Not safe</sub> | <sub>✅ Battle-tested</sub> |
+| <sub>**Crash isolation**</sub> | <sub>❌ Crashes all</sub> | <sub>✅ Worker isolation</sub> |
 
 **How Gunicorn works:**
 ```bash
@@ -804,12 +804,12 @@ Publisher → [Message] → Broker → [Message] → Subscribers
 - ✅ Chat systems (instant messaging)
 
 **Why Mosquitto over others:**
-| Feature | Mosquitto | RabbitMQ | Redis Pub/Sub |
+| <sub>Feature</sub> | <sub>Mosquitto</sub> | <sub>RabbitMQ</sub> | <sub>Redis Pub/Sub</sub> |
 |---------|-----------|----------|---------------|
-| **Size** | 10MB | 200MB | 50MB |
-| **Protocol** | MQTT | AMQP | Redis |
-| **IoT focus** | ✅ Yes | ❌ No | ❌ No |
-| **QoS levels** | 0,1,2 | Yes | No |
+| <sub>**Size**</sub> | <sub>10MB</sub> | <sub>200MB</sub> | <sub>50MB</sub> |
+| <sub>**Protocol**</sub> | <sub>MQTT</sub> | <sub>AMQP</sub> | <sub>Redis</sub> |
+| <sub>**IoT focus**</sub> | <sub>✅ Yes</sub> | <sub>❌ No</sub> | <sub>❌ No</sub> |
+| <sub>**QoS levels**</sub> | <sub>0,1,2</sub> | <sub>Yes</sub> | <sub>No</sub> |
 
 **Docker Compose setup:**
 ```yaml
@@ -1271,13 +1271,13 @@ jobs:
 
 ### Core Technologies
 
-| Technology | Purpose | Why We Chose It | Trade-offs | Example Location |
+| <sub>Technology</sub> | <sub>Purpose</sub> | <sub>Why We Chose It</sub> | <sub>Trade-offs</sub> | <sub>Example Location</sub> |
 |------------|---------|-----------------|------------|------------------|
-| **Docker** | Container Runtime | Industry standard, extensive ecosystem, cross-platform support | Learning curve for beginners | All examples |
-| **Docker Compose** | Multi-container orchestration | Simplified local development, easy configuration YAML | Not for production at scale (use Kubernetes) | `intermediate/`, `messaging/` |
-| **Alpine Linux** | Base Images | Minimal size (5MB), security-focused, musl libc | Some packages not available, compatibility issues | Most examples |
-| **Debian Slim** | Alternative Base | Better compatibility, glibc, more packages available | Larger than Alpine (~30MB vs 5MB) | Python examples |
-| **Scratch** | Minimal Base | Literally empty (0MB), maximum security | Only works with static binaries (Go, Rust) | Go example |
+| <sub>**Docker**</sub> | <sub>Container Runtime</sub> | <sub>Industry standard, extensive ecosystem, cross-platform support</sub> | <sub>Learning curve for beginners</sub> | <sub>All examples</sub> |
+| <sub>**Docker Compose**</sub> | <sub>Multi-container orchestration</sub> | <sub>Simplified local development, easy configuration YAML</sub> | <sub>Not for production at scale (use Kubernetes)</sub> | <sub>`intermediate/`, `messaging/`</sub> |
+| <sub>**Alpine Linux**</sub> | <sub>Base Images</sub> | <sub>Minimal size (5MB), security-focused, musl libc</sub> | <sub>Some packages not available, compatibility issues</sub> | <sub>Most examples</sub> |
+| <sub>**Debian Slim**</sub> | <sub>Alternative Base</sub> | <sub>Better compatibility, glibc, more packages available</sub> | <sub>Larger than Alpine (~30MB vs 5MB)</sub> | <sub>Python examples</sub> |
+| <sub>**Scratch**</sub> | <sub>Minimal Base</sub> | <sub>Literally empty (0MB), maximum security</sub> | <sub>Only works with static binaries (Go, Rust)</sub> | <sub>Go example</sub> |
 
 ### Why These Base Images?
 
@@ -1555,13 +1555,13 @@ graph TB
 
 ### Why Multi-Stage Builds?
 
-| Aspect | Single-Stage | Multi-Stage | Improvement |
+| <sub>Aspect</sub> | <sub>Single-Stage</sub> | <sub>Multi-Stage</sub> | <sub>Improvement</sub> |
 |--------|--------------|-------------|-------------|
-| **Image Size** | 500MB - 2GB | 50MB - 300MB | **70-90% reduction** |
-| **Build Time** | Slow (no caching) | Fast (layer caching) | **50-70% faster** |
-| **Security** | All build tools included | Only runtime needed | **80% fewer vulnerabilities** |
-| **Attack Surface** | Large | Minimal | **Significantly reduced** |
-| **Deployment Speed** | Slow transfer | Fast transfer | **3-5x faster** |
+| <sub>**Image Size**</sub> | <sub>500MB - 2GB</sub> | <sub>50MB - 300MB</sub> | <sub>**70-90% reduction**</sub> |
+| <sub>**Build Time**</sub> | <sub>Slow (no caching)</sub> | <sub>Fast (layer caching)</sub> | <sub>**50-70% faster**</sub> |
+| <sub>**Security**</sub> | <sub>All build tools included</sub> | <sub>Only runtime needed</sub> | <sub>**80% fewer vulnerabilities**</sub> |
+| <sub>**Attack Surface**</sub> | <sub>Large</sub> | <sub>Minimal</sub> | <sub>**Significantly reduced**</sub> |
+| <sub>**Deployment Speed**</sub> | <sub>Slow transfer</sub> | <sub>Fast transfer</sub> | <sub>**3-5x faster**</sub> |
 
 ## 🎓 Multi-Stage Builds Deep Dive
 
@@ -1588,12 +1588,12 @@ CMD ["node", "server.js"]
 
 ### Real-World Example Comparison
 
-| Example | Single-Stage | Multi-Stage | Reduction |
+| <sub>Example</sub> | <sub>Single-Stage</sub> | <sub>Multi-Stage</sub> | <sub>Reduction</sub> |
 |---------|--------------|-------------|-----------|
-| Python Flask | 450MB | 151MB | 66% ⬇️ |
-| Node.js Express | 380MB | 137MB | 64% ⬇️ |
-| Go Application | 800MB | 12MB | 98% ⬇️ |
-| React App | 1.2GB | 25MB | 98% ⬇️ |
+| <sub>Python Flask</sub> | <sub>450MB</sub> | <sub>151MB</sub> | <sub>66% ⬇️</sub> |
+| <sub>Node.js Express</sub> | <sub>380MB</sub> | <sub>137MB</sub> | <sub>64% ⬇️</sub> |
+| <sub>Go Application</sub> | <sub>800MB</sub> | <sub>12MB</sub> | <sub>98% ⬇️</sub> |
+| <sub>React App</sub> | <sub>1.2GB</sub> | <sub>25MB</sub> | <sub>98% ⬇️</sub> |
 
 ### Key Benefits Flow
 
@@ -2013,16 +2013,16 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 ### 🎯 Quick Reference: When to Use What
 
-| Scenario | Pattern | Why |
+| <sub>Scenario</sub> | <sub>Pattern</sub> | <sub>Why</sub> |
 |----------|---------|-----|
-| Compiled languages (Go, Rust, Java) | Multi-stage + scratch/distroless | 90%+ size reduction |
-| Interpreted languages (Python, Node.js) | Multi-stage + slim base | 60-70% size reduction |
-| Frequent dependency changes | Cache optimization (copy package files first) | Fast rebuilds |
-| Production deployment | Non-root user + health checks | Security + reliability |
-| Secrets needed | Runtime env vars or Docker secrets | Never baked into image |
-| Multiple environments (dev/prod) | Build arguments | Different configs per environment |
-| Fast builds | .dockerignore + layer optimization | Reduce build context |
-| Multiple architectures | Multi-platform builds | Support Intel + ARM |
+| <sub>Compiled languages (Go, Rust, Java)</sub> | <sub>Multi-stage + scratch/distroless</sub> | <sub>90%+ size reduction</sub> |
+| <sub>Interpreted languages (Python, Node.js)</sub> | <sub>Multi-stage + slim base</sub> | <sub>60-70% size reduction</sub> |
+| <sub>Frequent dependency changes</sub> | <sub>Cache optimization (copy package files first)</sub> | <sub>Fast rebuilds</sub> |
+| <sub>Production deployment</sub> | <sub>Non-root user + health checks</sub> | <sub>Security + reliability</sub> |
+| <sub>Secrets needed</sub> | <sub>Runtime env vars or Docker secrets</sub> | <sub>Never baked into image</sub> |
+| <sub>Multiple environments (dev/prod)</sub> | <sub>Build arguments</sub> | <sub>Different configs per environment</sub> |
+| <sub>Fast builds</sub> | <sub>.dockerignore + layer optimization</sub> | <sub>Reduce build context</sub> |
+| <sub>Multiple architectures</sub> | <sub>Multi-platform builds</sub> | <sub>Support Intel + ARM</sub> |
 
 ---
 
@@ -2059,14 +2059,14 @@ Please see our detailed [Contributing Guide](docs/contributing.md) for:
 
 ## � Project Status
 
-| Metric | Status |
+| <sub>Metric</sub> | <sub>Status</sub> |
 |--------|--------|
-| **Beginner Examples** | ✅ 4/4 Complete |
-| **Intermediate Examples** | ✅ 1/3 In Progress |
-| **Advanced Examples** | ⭕ 0/5 Planned |
-| **Expert Examples** | ⭕ 0/3 Planned |
-| **Documentation** | 🟡 75% Complete |
-| **Test Coverage** | 🟡 60% Complete |
+| <sub>**Beginner Examples**</sub> | <sub>✅ 4/4 Complete</sub> |
+| <sub>**Intermediate Examples**</sub> | <sub>✅ 1/3 In Progress</sub> |
+| <sub>**Advanced Examples**</sub> | <sub>⭕ 0/5 Planned</sub> |
+| <sub>**Expert Examples**</sub> | <sub>⭕ 0/3 Planned</sub> |
+| <sub>**Documentation**</sub> | <sub>🟡 75% Complete</sub> |
+| <sub>**Test Coverage**</sub> | <sub>🟡 60% Complete</sub> |
 
 ## �📄 License
 

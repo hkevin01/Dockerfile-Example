@@ -157,11 +157,11 @@ docker rm -f python-test
 ## ⚙️ Configuration Options
 
 ### Environment Variables
-| Variable | Description | Default | Example |
+| <sub>Variable</sub> | <sub>Description</sub> | <sub>Default</sub> | <sub>Example</sub> |
 |----------|-------------|---------|---------|
-| `PYTHONUNBUFFERED` | Disable output buffering | `1` | `1` |
-| `PYTHONDONTWRITEBYTECODE` | Disable .pyc files | `1` | `1` |
-| `PYTHONPATH` | Python module search path | Not set | `/app/modules` |
+| <sub>`PYTHONUNBUFFERED`</sub> | <sub>Disable output buffering</sub> | <sub>`1`</sub> | <sub>`1`</sub> |
+| <sub>`PYTHONDONTWRITEBYTECODE`</sub> | <sub>Disable .pyc files</sub> | <sub>`1`</sub> | <sub>`1`</sub> |
+| <sub>`PYTHONPATH`</sub> | <sub>Python module search path</sub> | <sub>Not set</sub> | <sub>`/app/modules`</sub> |
 
 ### Runtime Arguments
 ```bash

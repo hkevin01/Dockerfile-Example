@@ -94,11 +94,11 @@ docker rm node-hello
 
 ## 📡 API Endpoints
 
-| Endpoint | Description | Response |
+| <sub>Endpoint</sub> | <sub>Description</sub> | <sub>Response</sub> |
 |----------|-------------|----------|
-| `GET /` | Main application endpoint | System info and greeting |
-| `GET /health` | Health check endpoint | Application health status |
-| `GET /info` | Application information | Detailed app and system info |
+| <sub>`GET /`</sub> | <sub>Main application endpoint</sub> | <sub>System info and greeting</sub> |
+| <sub>`GET /health`</sub> | <sub>Health check endpoint</sub> | <sub>Application health status</sub> |
+| <sub>`GET /info`</sub> | <sub>Application information</sub> | <sub>Detailed app and system info</sub> |
 
 ## 🔍 Example Responses
 

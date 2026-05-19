@@ -316,11 +316,11 @@ docker rm test-flask
 
 ## 📈 Image Size Comparison
 
-| Build Type | Image Size | Build Tools | Security | Production Ready |
+| <sub>Build Type</sub> | <sub>Image Size</sub> | <sub>Build Tools</sub> | <sub>Security</sub> | <sub>Production Ready</sub> |
 |-----------|-----------|-------------|----------|-----------------|
-| Single-Stage | ~350MB | Included ❌ | Lower | No |
-| Multi-Stage | ~175MB | Excluded ✅ | Higher | Yes |
-| **Savings** | **50%** | **✓** | **✓** | **✓** |
+| <sub>Single-Stage</sub> | <sub>~350MB</sub> | <sub>Included ❌</sub> | <sub>Lower</sub> | <sub>No</sub> |
+| <sub>Multi-Stage</sub> | <sub>~175MB</sub> | <sub>Excluded ✅</sub> | <sub>Higher</sub> | <sub>Yes</sub> |
+| <sub>**Savings**</sub> | <sub>**50%**</sub> | <sub>**✓**</sub> | <sub>**✓**</sub> | <sub>**✓**</sub> |
 
 ## 🔐 Security Features
 

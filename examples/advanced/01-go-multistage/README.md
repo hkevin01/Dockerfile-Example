@@ -12,11 +12,11 @@ This example demonstrates an **extreme** multi-stage build using Go, resulting i
 
 ## 📊 Image Size Comparison
 
-| Build Type | Image Size | Description |
+| <sub>Build Type</sub> | <sub>Image Size</sub> | <sub>Description</sub> |
 |-----------|-----------|-------------|
-| Single-stage (golang:1.21) | ~800MB | Includes entire Go toolchain |
-| Multi-stage (alpine) | ~15MB | Uses Alpine Linux runtime |
-| Multi-stage (scratch) | **~6MB** | Only contains the binary |
+| <sub>Single-stage (golang:1.21)</sub> | <sub>~800MB</sub> | <sub>Includes entire Go toolchain</sub> |
+| <sub>Multi-stage (alpine)</sub> | <sub>~15MB</sub> | <sub>Uses Alpine Linux runtime</sub> |
+| <sub>Multi-stage (scratch)</sub> | <sub>**~6MB**</sub> | <sub>Only contains the binary</sub> |
 
 ## 🚀 Quick Start
 
